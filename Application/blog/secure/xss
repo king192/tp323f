@@ -1,0 +1,4 @@
+<?php
+/*由于前端输出过滤不严谨发现了一枚xss漏洞，地址是小喇叭商品详情页，路由规则:'/^mobifstgod-(\w{1,})-(\w{1,})-(\d{1,})-(\d{1,})-(\S{1,})-(\d{10,20})$/' => 'Mob/Index/infoStoreGoods?&k=:1&v=:2&gid=:3&stid=:4&uid=:5&dateinfo=:6',第五个即uid输入的是经过base64_encode加密的字符串，然后后端前端输出前base64_decode,那么根据javascript语言重新构造
+javascript代码,构造出这样的url：http://xian.sunyoupai.com/mob/mobifstgod-tksynalbfd-foerigtkqb-5291-6-IjthbGVydChkb2N1bWVudC5jb29raWUpOy8v-1456810619，
+url可以构造成其带参的跳转到其他服务器地址后达到收集用户cookie的目的，另外，url可以生成二维码，那么，用户被攻击了然而可以好像什么事都没发生，问题又来了，在微信怎么获取原始url？首先通过分享功能发送给自己，然后通过邮件转发就可以得到url地址，也就可以实现前面的步骤了，临时解决方法是对输出进行过滤，另外设置cookie的httponly为true
