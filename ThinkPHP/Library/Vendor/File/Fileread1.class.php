@@ -10,11 +10,11 @@ filemtime
 closedir
 */
 set_time_limit(0);
-class Fileread{
-	protected $file_num = 0;
-	protected $dir_num = 0;
+class Fileread1{
+	protected static $file_num = 0;
+	protected static $dir_num = 0;
 	protected $is_readdir = false;
-	function readfile($dir){
+	static function readfile($dir){
 		//先判断指定的路径是不是一个文件夹
 		if (is_dir($dir)){
 			if ($dh = opendir($dir)){//打开文件夹
@@ -23,12 +23,12 @@ class Fileread{
 					$filePath = $dir.$file;
 
 					if(is_dir($filePath) && $file != '.' && $file != '..'){
-						$this->dir_num++;
+						self::$dir_num++;
 						$filePath = $filePath.'/';
 						// echo 'is dir';
-						$this->readfile($filePath);
+						self::readfile($filePath);
 					}elseif(!is_dir($filePath)){
-						$this->file_num++;
+						self::$file_num++;
 						$fmt = filemtime($filePath);
 						echo "<span style='color:#666'>(".date("Y-m-d H:i:s",$fmt).")</span> ".$filePath."<br/>";
 					}
@@ -41,10 +41,10 @@ class Fileread{
 			}
 		}
 	}
-	function get_count(){
+	static function get_count(){
 		header('content-type:text/html,charset:utf-8');
-		echo '共有文件：'.$this->file_num.'<br>';
-		echo '公有文件夹'.$this->dir_num.'<br>';
+		echo '共有文件：'.self::$file_num.'<br>';
+		echo '公有文件夹'.self::$dir_num.'<br>';
 	}
 }
 // $dir = "E:/UPUPW_APACHE_PHP5.3.28_UP-A3.4/upupw/htdocs/expressjs/";  //要获取的目录

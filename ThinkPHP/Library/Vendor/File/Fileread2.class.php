@@ -10,10 +10,19 @@ filemtime
 closedir
 */
 set_time_limit(0);
-class Fileread{
+class Fileread2{
 	protected $file_num = 0;
 	protected $dir_num = 0;
 	protected $is_readdir = false;
+	static private $db;
+	static function getInstance(){
+        if (empty(self::$db)) {
+            self::$db = new self;
+            return self::$db;
+        } else {
+            return self::$db;
+        }
+	}
 	function readfile($dir){
 		//先判断指定的路径是不是一个文件夹
 		if (is_dir($dir)){
