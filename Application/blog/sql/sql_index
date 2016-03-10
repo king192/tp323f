@@ -1,0 +1,135 @@
+索引使用的日常操作
+        操作动作描述                          是否使用            
+        列经常被分组排序                        使用                              
+        返回某范围内的数据               使用                              
+        一个或极少不同值                        不使用                     
+        小数目的不同值                 使用                              
+        大数目的不同值                 不使用                     
+        频繁更新的列                          不使用                     
+        外键列                                     使用                              
+        主键列                                     使用                              
+        频繁修改索引列                 不使用             
+
+索引缺点：
+        (1)会降低更新表的速度，如对表进行INSERT、UPDATE和DELETE。因为更新表时，MySQL不仅要保存数据，还要保存一下索引文件。
+        (2)建立索引会占用磁盘空间的索引文件。一般情况这个问题不太严重，但如果你在一个大表上创建了多种组合索引，索引文件的会膨胀很快。
+
+
+索引方式
+        B-Tree索引.进行全关键字、关键字范围和关键字前缀查询
+        hash索引.只有Memory存储引擎显示支持hash索引 仅仅能满足=，<=>，IN，IS NULL或者IS NOT NULL查询，不能使用范围查询(不推荐)
+
+索引类型
+        普通(index)索引:MyIASM中默认的BTREE类型的索引
+                –直接创建索引
+                CREATE INDEX index_name ON table(column(length))
+                –修改表结构的方式添加索引
+                ALTER TABLE table_name ADD INDEX index_name ON (column(length))
+                –创建表的时候同时创建索引
+                CREATE TABLE `table` (
+                `id` int(11) NOT NULL AUTO_INCREMENT ,
+                `title` char(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ,
+                `content` text CHARACTER SET utf8 COLLATE utf8_general_ci NULL ,
+                `time` int(10) NULL DEFAULT NULL ,
+                PRIMARY KEY (`id`),
+                INDEX index_name (title(length))
+                )
+                –删除索引
+                DROP INDEX index_name ON table
+                
+                注意:
+                        index_name为索引名，
+                        table表名，
+                        column为列名，
+                        length为前缀长度，即索引在该列从最左字符开始存储的信息长度，单位字节
+                                如果是CHAR，VARCHAR类型，前缀长度可以小于字段实际长度；
+                                如果是BLOB和TEXT类型，必须指定 前缀长度，下同。
+        
+
+        唯一(Unique)索引:不同的就是：索引列的值必须唯一，但允许有空值（注意和主键不同）
+                –创建唯一索引
+                CREATE UNIQUE INDEX indexName ON table(column(length))
+                –修改表结构
+                ALTER TABLE table_name ADD UNIQUE indexName ON (column(length))
+                –创建表的时候直接指定
+                CREATE TABLE `table` (
+                `id` int(11) NOT NULL AUTO_INCREMENT ,
+                `title` char(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ,
+                `content` text CHARACTER SET utf8 COLLATE utf8_general_ci NULL ,
+                `time` int(10) NULL DEFAULT NULL ,
+                PRIMARY KEY (`id`),
+                UNIQUE indexName (title(length))
+                );
+
+        全文(Full-text)索引:可以从CHAR、VARCHAR或TEXT列中检索关键字
+                                                将你的资料输入一个没有FULLTEXT索引的表中，然后创建索引，
+                                                其速度比把资料输入现有FULLTEXT索引的速度更为快。
+                                                不过切记对于大容量的数据表，生成全文索引是一个非常消耗时间非常消耗硬盘空间的做法
+                –修改表结构添加全文索引
+                ALTER TABLE article ADD FULLTEXT index_content(content)
+                –直接创建索引
+                CREATE FULLTEXT INDEX index_content ON article(content)
+                –创建表的适合添加全文索引
+                CREATE TABLE `table` (
+                `id` int(11) NOT NULL AUTO_INCREMENT ,
+                `title` char(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ,
+                `content` text CHARACTER SET utf8 COLLATE utf8_general_ci NULL ,
+                `time` int(10) NULL DEFAULT NULL ,
+                PRIMARY KEY (`id`),
+                FULLTEXT (content)
+                );
+
+
+
+查看索引使用情况
+        语法：SHOW STATUS LIKE 'Handler_read%';
+        如果索引正在工作，Handler_read_key的值将很高，这个值代表了一个行被索引值读的次数，很低的值表明增加索引得到的性能改善不高，因为索引并不经常使用。
+        Handler_read_rnd_next的值高则意味着查询运行低效，并且应该建立索引补救。这个值的含义是在数据文件中读下一行的请求数。如果你正进行大量的表扫描，该值较高。通常说明表索引不正确或写入的查询没有利用索引。
+
+        
+        
+        
+使用索引要注意的
+        (1)索引名称不要冲突
+        (2)索引不会包含有NULL值的列 [建表时候一定要给not null或者默认值]
+        (3)索引越短越好,例如，如果有一个 CHAR(200) 列，如果在前 10 个或 20 个字符内，
+                                        多数值是惟一的，那么就不要对整个列进行索引。对前 10 个或 20 个字符进行索引能够节省大量索引空间，也可能会使查询更快。
+        (4)索引列排序[如果where子句中已经使用了索引的话，
+                                排序(全部升序或者全部降序)时候,是直接用索引排序的,排序很快又高效
+                            那么这时就不需要order by再去排序了
+                    尽量不要包含多个列的排序，如果需要最好给这些列创建复合索引。]
+        (5)where条件为字符串的一定要加引号 例如: EXPLAIN SELECT * from wm_goods WHERE  title = '123'
+        (6)like语句操作,一般情况下不鼓励使用like操作，如果非使用不可要注意[like “%aaa%” 不会使用索引而like “aaa%”可以使用索引]
+        (7)MySQL只对一下操作符才使用索引：<,<=,=,>,>=,between,in,
+                以及某些时候的like(不以通配符%或_开头的情形)。
+                而理论上每张表里面最多可创建16个索引，不过除非是数据量真的很多，
+                否则过多的使用索引也不是那么好玩的，比如我在测试时对text类型的字段创建索引的时候，系统就卡死了。
+        (8)在使用NOT IN和<>操作时候起不到关键作用  例如: EXPLAIN SELECT * from wm_goods WHERE  title <> '123'
+        (8)WHERE index=1 OR A=10 也不会用到索引
+
+
+
+
+索引实例
+        如果对多列进行索引(组合索引)，列的顺序非常重要，MySQL仅能对索引最左边的前缀进行有效的查找。
+        例如：
+                假设存在组合索引KEY `g_gcat_id` (`gcat_id`,`brands_id`) USING BTREE，
+                查询语句EXPLAIN SELECT * from wm_goods WHERE gcat_id = 1 and brands_id = 3能够使用该索引。
+                查询语句EXPLAIN SELECT * from wm_goods WHERE gcat_id = 1 也能够使用该索引。
+                但是，查询语句EXPLAIN SELECT * from wm_goods WHERE  brands_id = 3不能够使用该索引，
+                因为没有组合索引的引导列，即，要想使用brands_id列进行查找，必需出现gcat_id等于某值。
+
+
+mysql强制索引和禁止某个索引
+        1、mysql强制使用索引:force index(索引名或者主键PRI)
+        例如:
+        select * from table force index(PRI) limit 2;(强制使用主键)
+        select * from table force index(ziduan1_index) limit 2;(强制使用索引”ziduan1_index”)
+        select * from table force index(PRI,ziduan1_index) limit 2;(强制使用索引”PRI和ziduan1_index”)
+ 
+
+        2、mysql禁止某个索引：ignore index(索引名或者主键PRI)
+        例如:
+        select * from table ignore index(PRI) limit 2;(禁止使用主键)
+        select * from table ignore index(ziduan1_index) limit 2;(禁止使用索引”ziduan1_index”)
+        select * from table ignore index(PRI,ziduan1_index) limit 2;(禁止使用索引”PRI,ziduan1_index”)
