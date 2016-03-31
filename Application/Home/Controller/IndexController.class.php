@@ -14,7 +14,7 @@ class IndexController extends Controller {
 		var_dump($area);
 		var_dump($IP);
     }
-    public function m(){
+    public function m(){ 
     	echo phpinfo();
     }
 }
