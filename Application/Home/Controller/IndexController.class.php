@@ -1,6 +1,7 @@
 <?php
 namespace Home\Controller;
 use Think\Controller;
+use \Think\Logs;
 class IndexController extends Controller {
     public function index(){
         echo base64_encode('";alert(true);//');
@@ -16,5 +17,33 @@ class IndexController extends Controller {
     }
     public function m(){ 
     	echo phpinfo();
+    }
+    public function logt(){
+        G('a');
+        $i = 100000;
+        while ($i--) {
+            // \Think\Log::write('thinkphp log test');
+            \Think\Log::write('thinkphp log test',\Think\Log::ERR,'Seaslog');
+        }
+        echo G('a','end',6)."<br>\n";
+        echo G('a','end','m');
+    }
+    public function logs(){
+        G('a');
+        $i = 100000;
+        while ($i--) {
+            \Think\Slog::write('thinkphp log test');
+        }
+        echo G('a','end',6)."<br>\n";
+        echo G('a','end','m');
+    }
+    public function logs1(){
+        Logs::setLogger('Home');
+        Logs::error('module');
+    }
+    public function ana(){
+        $info = Logs::analyzerDetail('error');
+        // $info = \SeasLog::analyzerDetail('error');
+        dump($info);
     }
 }
