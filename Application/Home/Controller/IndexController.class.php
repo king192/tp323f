@@ -4,7 +4,8 @@ use Think\Controller;
 use \Think\Logs;
 class IndexController extends Controller {
     public function index(){
-        echo base64_encode('";alert(true);//');
+        // dump($_SERVER);
+        $this->display();
     }
     public function location(){
     	var_dump($_SERVER);
@@ -45,5 +46,9 @@ class IndexController extends Controller {
         $info = Logs::analyzerDetail('error');
         // $info = \SeasLog::analyzerDetail('error');
         dump($info);
+    }
+    public function get(){
+        echo 2;
+        print_r($_GET);
     }
 }
