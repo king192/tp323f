@@ -4,4 +4,11 @@ return array(
     // 'DEFAULT_MODULE'        =>  'User',  // 默认模块
     // 'VIEW_PATH'	=> 'test',
     'TMPL_ENGINE_TYPE' => 'Smarty',
+    'test' => array(
+    	'hello'=>'1',
+    	'hi'=>array(
+    		'a'=>'a',
+    		'b'=>'b',
+    		),
+    	),
 );

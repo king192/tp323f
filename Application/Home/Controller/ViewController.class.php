@@ -11,4 +11,8 @@ class ViewController extends Controller{
 		$view = \Think\Think::instance('Think\View');
 		$view->display();
 	}
+
+	public function index2(){
+		$this->display();
+	}
 }

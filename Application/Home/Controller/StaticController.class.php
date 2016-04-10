@@ -2,6 +2,7 @@
 namespace Home\Controller;
 use Think\Controller;
 use Vendor\Test\statics;
+use Vendor\Test\constru;
 
 class StaticController extends Controller{
 	public function index(){
@@ -26,5 +27,9 @@ class StaticController extends Controller{
 	}
 	public function get(){
 		statics::get();
+	}
+	public function index3(){
+		// new constru();
+		constru::hi();
 	}
 }
