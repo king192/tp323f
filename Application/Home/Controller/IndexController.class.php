@@ -5,6 +5,7 @@ use \Think\Logs;
 class IndexController extends Controller {
     public function index(){
         // dump($_SERVER);
+        $this->assign(array('title'=>'hello','body'=>'hi'));
         $this->display();
     }
     public function location(){
